@@ -634,10 +634,6 @@ function add_line(id)
       })
 
   var chart_svg = chart[id].container.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-  tip[id]       = chart_svg.append("text")
-                            .attr("class", "tooltip")
-                            .style("opacity", 0);
-
   var chart_lines = d3.nest()
       .key(function(d) {
           return d.name;
@@ -729,6 +725,10 @@ function add_line(id)
           });
 
   });
+
+  tip[id]       = chart_svg.append("text")
+                            .attr("class", "tooltip")
+                            .style("opacity", 0);
 }
 
 function toggle_line(id, name)
