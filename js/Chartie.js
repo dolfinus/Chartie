@@ -468,7 +468,7 @@ function calc_width(id)
 {
   var legend_width  = 0;
   sorted[id].forEach(function(name) {
-    legend_width = Math.max(legend_width, get_text_width(name)+5);
+    legend_width = Math.max(legend_width, get_text_width(name)+20, 80);
   });
 
   legend[id].width = legend_width;
@@ -485,14 +485,14 @@ function calc_width(id)
 function calc_height(id)
 {
   if (isNaN(height[id])) {
-      chart[id].height = Math.max(((window.innerHeight !== 0) ? window.innerHeight : screen.Height)-90, 360);
+      chart[id].height = Math.max(((window.innerHeight !== 0) ? window.innerHeight : screen.height)-90, 360);
       window.addEventListener("resize", draw_all);
   } else {
     chart[id].height = height[id];
   }
 
   var legend_height = 0;
-  legend_height = Math.max(chart[id].height-10, sorted.length * symb_height );
+  legend_height = Math.max(chart[id].height-10, sorted[id].length * symb_height );
 
   legend[id].height = legend_height;
 }
