@@ -114,7 +114,7 @@ $wgChartie["class"]  = 'someclass';
 ```
 
 ## Controls
-|Action                          |Controls                               |
+|Controls                        |Action                                 |
 |:-------------------------------|:--------------------------------------|
 |Mouse over line, touch line     |Show tooltip with extrapolated value   |
 |Mouse over line dots, touch dot |Show tooltip with exact value          |
