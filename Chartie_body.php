@@ -1,21 +1,26 @@
 <?php
+ global $wgChartie;
+ $wgChartie_ = $wgChartie;
+ unset ($wgChartie);
 
  global $wgChartie;
- $wgChartie["data"]='';
- if (!isset($wgChartie["width"]       )) $wgChartie["width"]        = 865;
- if (!isset($wgChartie["height"]      )) $wgChartie["height"]       = 360;
- if (!isset($wgChartie["legend_title"])) $wgChartie["legend_title"] = '';
- if (!isset($wgChartie["x_type"]      )) $wgChartie["x_type"]       = '';
- if (!isset($wgChartie["x_title"]     )) $wgChartie["x_title"]      = '';
- if (!isset($wgChartie["x_unit"]      )) $wgChartie["x_unit"]       = '';
- if (!isset($wgChartie["x_null"]      )) $wgChartie["x_null"]       = '';
- if (!isset($wgChartie["y_type"]      )) $wgChartie["y_type"]       = '';
- if (!isset($wgChartie["y_title"]     )) $wgChartie["y_title"]      = '';
- if (!isset($wgChartie["y_unit"]      )) $wgChartie["y_unit"]       = '';
- if (!isset($wgChartie["y_null"]      )) $wgChartie["y_null"]       = '';
- if (!isset($wgChartie["delimiter"]   )) $wgChartie["delimiter"]    = ';';
- if (!isset($wgChartie["style"]       )) $wgChartie["style"]        = '';
- $wgChartie["class"] = 'chart-container'. (isset($wgChartie["class"]) ? ' '.$wgChartie["class"] : '') ;
+ $wgChartie                 = [];
+ $wgChartie["data"]         = '';
+ $wgChartie["width"]        = isset($wgChartie_["width"]       ) ? $wgChartie_["width"]        : 865;
+ $wgChartie["height"]       = isset($wgChartie_["height"]      ) ? $wgChartie_["height"]       : 360;
+ $wgChartie["legend_title"] = isset($wgChartie_["legend_title"]) ? $wgChartie_["legend_title"] : '' ;
+ $wgChartie["x_type"]       = isset($wgChartie_["x_type"]      ) ? $wgChartie_["x_type"]       : '' ;
+ $wgChartie["x_title"]      = isset($wgChartie_["x_title"]     ) ? $wgChartie_["x_title"]      : '' ;
+ $wgChartie["x_unit"]       = isset($wgChartie_["x_unit"]      ) ? $wgChartie_["x_unit"]       : '' ;
+ $wgChartie["x_null"]       = isset($wgChartie_["x_null"]      ) ? $wgChartie_["x_null"]       : '' ;
+ $wgChartie["y_type"]       = isset($wgChartie_["y_type"]      ) ? $wgChartie_["y_type"]       : '' ;
+ $wgChartie["y_title"]      = isset($wgChartie_["y_title"]     ) ? $wgChartie_["y_title"]      : '' ;
+ $wgChartie["y_unit"]       = isset($wgChartie_["y_unit"]      ) ? $wgChartie_["y_unit"]       : '' ;
+ $wgChartie["y_null"]       = isset($wgChartie_["y_null"]      ) ? $wgChartie_["y_null"]       : '' ;
+ $wgChartie["delimiter"]    = isset($wgChartie_["delimiter"]   ) ? $wgChartie_["delimiter"]    : ';';
+ $wgChartie["style"]        = isset($wgChartie_["style"]       ) ? $wgChartie_["style"]        : '' ;
+ $wgChartie["class"]        = 'chart-container'.
+                             (isset($wgChartie_["class"])        ? ' '.$wgChartie_["class"]    : '');
 
  class Chartie extends ImageHandler {
 	public static function onBeforePageDisplay ( OutputPage $out, $skin){
@@ -56,7 +61,7 @@
       $params = array_merge($wgChartie, $args);
       $params["style"] = $wgChartie["style"].' '.$params["style"];
       $params["class"] = $wgChartie["class"].' '.$params["class"];
-      $params["data"]  = (isset($args["data"]) ? $params["data"] : trim($input));
+      $params["data" ] =(isset($args["data"]) ?  $params["data" ]: trim($input));
 
       $f = Title::newFromText( $params["data"], NS_FILE );
       if ($f) {
