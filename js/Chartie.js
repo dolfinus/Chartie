@@ -165,6 +165,9 @@ function load_csv(id)
 function get_params(id) {
   var delimiter = container[id].getAttribute('delimiter')  !== null ? container[id].getAttribute('delimiter') : def_delim;
   parce_csv(root[id], delimiter, id);
+  root[id].sort(function(a, b) {
+    return d3.ascending(a.name, b.name) || d3.ascending(a.x, b.x);
+  });
 
   //get sorted unique names for legend and toogle
   sorted[id]    = [];
