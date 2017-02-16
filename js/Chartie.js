@@ -84,8 +84,8 @@ if ( container ) {
     {
       name  : "length",
       title : "Length",
-      units : ["mm", "cm", "in",  "ft",   "yd",  "m",  "km",   "mile"],
-      coeffs: [ 1,    10,  25.4,  304.8, 914.4, 1000, 100000, 1609000]
+      units : ["mm", "cm", "in",  "ft",   "yd",  "m",   "km",   "mile"],
+      coeffs: [ 1,    10,  25.4,  304.8, 914.4, 1000, 1000000, 1609000]
     },
     {
       name  : "area",
