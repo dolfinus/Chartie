@@ -108,7 +108,7 @@ if ( container ) {
     {
       name  : "temp",
       title : "Temperature",
-      units : ["C", "K", "F"]
+      units : ["C", "K", "F", "Ra"]
     },
     {
       name  : "solub",
@@ -416,6 +416,8 @@ function convert_data(type, i, num)
           return num + 273.15;
         case 2:
           return num * 9 / 5 + 32;
+        case 3:
+          return (num + 273.15 )* 1.8;
       }
       break;
     case "solub":
@@ -445,6 +447,8 @@ function normalize_data(type, i, num)
           return num - 273.15;
         case 2:
           return (num - 32 ) * 5 / 9;
+        case 3:
+          return (num - 273.15) / 1.8;
       }
       break;
     case "solub":

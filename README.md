@@ -97,7 +97,7 @@ By default, axis titles and units are automatically sets its value, based on typ
 |area    |mm2,cm2,in2,dm2,ft2,yd2,m2,a,da,acre,ha,km2,mile2  |
 |volume  |mm3,cm3,pt,qt,l,gal,br,m3,km3                      |
 |speed   |mps,knot,mph,fps,kph,kps,c                         |
-|temp    |C,K,F                                              |
+|temp    |C,K,F,Ra                                           |
 |solub   |g/100g,%                                           |
 
 ### Localisations

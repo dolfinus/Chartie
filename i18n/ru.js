@@ -43,7 +43,7 @@ var scale_types = [{
 {
   name  : "temp",
   title : "Температура",
-  units : ["C", "K", "F"]
+  units : ["C", "K", "F", "Ra"]
 },
 {
   name  : "solub",
