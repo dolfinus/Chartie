@@ -23,7 +23,7 @@
                              (isset($wgChartie_["class"])        ? ' '.$wgChartie_["class"]    : '');
 
  class Chartie extends ImageHandler {
-	public static function onBeforePageDisplay ( OutputPage $out, $skin){
+	public static function onBeforePageDisplay ( OutputPage $out){
 	    global $wgChartie, $wgLanguageCode;
 
   		if (strpos($out->getHTML(),'class="'.$wgChartie["class"]) !== false){
@@ -43,14 +43,16 @@
 	static public function onParserMakeImageParams($title, $file, &$params, Parser $parser ) {
 	    global $wgChartie;
 
-      if (self::check_file($file)) {
-	            $tmp = [];
-	            parse_str(str_replace(array(','), array('&'), $params["frame"]["caption"]), $tmp);
-	            foreach($wgChartie as $param => $value) {
-	                if (isset($tmp[$param])) $params["handler"][$param] = $tmp[$param];
-	            }
-	    	      return false;
-		  }
+      if ($file) {
+        if (self::check_file($file)) {
+                $tmp = [];
+                parse_str(str_replace(array(','), array('&'), $params["frame"]["caption"]), $tmp);
+                foreach($wgChartie as $param => $value) {
+                    if (isset($tmp[$param])) $params["handler"][$param] = $tmp[$param];
+                }
+                return false;
+        }
+      }
 
 		  return true;
 	}
@@ -125,40 +127,45 @@
 	}
 
 	public static function onImageOpenShowImageInlineBefore( $imagepage, $out ){
-  		global $wgChartie;
-  		if (self::check_file($imagepage->getDisplayedFile())) {
-  			    $params=$wgChartie;
-  			    $params["data"] = $imagepage->getDisplayedFile()->getCanonicalUrl();
+      global $wgChartie;
+      
+      if ($imagepage->getDisplayedFile()) {
+        if (self::check_file($imagepage->getDisplayedFile())) {
+              $params=$wgChartie;
+              $params["data"] = $imagepage->getDisplayedFile()->getCanonicalUrl();
 
-            $par = [];
-            foreach($params as $key=>$value){
-              if ($value !== '') {
-                $par[$key]=$value;
+              $par = [];
+              foreach($params as $key=>$value){
+                if ($value !== '') {
+                  $par[$key]=$value;
+                }
               }
-            }
 
-  			    $out->addHtml(Html::element('div', $par, ""));
-  			    $out->addModules('ext.Chartie');
-  		}
+              $out->addHtml(Html::element('div', $par, ""));
+              $out->addModules('ext.Chartie');
+        }
+      }
 	}
 
     public static function onImageBeforeProduceHTML (&$dummy, &$title, &$file, &$frameParams, &$handlerParams, &$time, &$res) {
         global $wgChartie;
 
-        if (self::check_file($file)) {
-            $params=array_merge($wgChartie, $handlerParams);
-            $params["data"] = $file->getCanonicalUrl();
+        if ($file) {
+          if (self::check_file($file)) {
+              $params=array_merge($wgChartie, $handlerParams);
+              $params["data"] = $file->getCanonicalUrl();
 
-            $par = [];
-            foreach($params as $key=>$value){
-              if ($value !== '') {
-                $par[$key]=$value;
+              $par = [];
+              foreach($params as $key=>$value){
+                if ($value !== '') {
+                  $par[$key]=$value;
+                }
               }
-            }
 
-            $res = Html::element('div', $par, "");
-            return false;
-		    }
+              $res = Html::element('div', $par, "");
+              return false;
+          }
+        }
 
 		    return true;
     }
