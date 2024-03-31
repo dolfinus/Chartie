@@ -1,4 +1,6 @@
 <?php
+use MediaWiki\MediaWikiServices;
+
  global $wgChartie;
  $wgChartie_ = $wgChartie;
  unset ($wgChartie);
@@ -67,7 +69,7 @@
 
       $f = Title::newFromText( $params["data"], NS_FILE );
       if ($f) {
-        $f = wfFindFile( $f->getBaseText() );
+        $f = MediaWikiServices::getInstance()->getRepoGroup()->findFile( $f->getBaseText());
       }
   		if ($f) {
   		    $params["data"] = $f->getCanonicalUrl();
@@ -92,7 +94,7 @@
 
       $f = Title::newFromText( trim($args[0]), NS_FILE );
       if ($f) {
-        $f = wfFindFile( $f->getBaseText() );
+        $f = MediaWikiServices::getInstance()->getRepoGroup()->findFile( $f->getBaseText());
       }
       if ($f) {
           $args[0] = ($f->getCanonicalUrl());
