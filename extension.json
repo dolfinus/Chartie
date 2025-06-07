@@ -3,13 +3,13 @@
   "author": "Dolfinus",
   "url": "https://www.mediawiki.org/wiki/Extension:Chartie",
   "description": "This extension provides a simple line chart, based on d3.js",
-  "version": "1.1",
+  "version": "1.1.1",
   "license-name": "MIT",
   "type": "media",
   "ResourceModules": {
     "ext.Chartie": {
       "position": "bottom",
-      "targets" : [
+      "targets": [
         "desktop",
         "mobile"
       ],
@@ -37,22 +37,22 @@
   },
   "Hooks": {
     "ParserMakeImageParams": [
-	    "Chartie::onParserMakeImageParams"
-	],
-  	"ParserFirstCallInit": [
-	    "Chartie::onParserFirstCallInit"
-	],
+      "Chartie::onParserMakeImageParams"
+    ],
+    "ParserFirstCallInit": [
+      "Chartie::onParserFirstCallInit"
+    ],
     "ImageBeforeProduceHTML": [
-        "Chartie::onImageBeforeProduceHTML"
+      "Chartie::onImageBeforeProduceHTML"
     ],
     "ImageOpenShowImageInlineBefore": [
-        "Chartie::onImageOpenShowImageInlineBefore"
+      "Chartie::onImageOpenShowImageInlineBefore"
     ],
     "BeforePageDisplay": [
-        "Chartie::onBeforePageDisplay"
+      "Chartie::onBeforePageDisplay"
     ],
     "BeforePageDisplayMobile": [
-		    "Chartie::onBeforePageDisplay"
+      "Chartie::onBeforePageDisplay"
     ]
   },
   "manifest_version": 1

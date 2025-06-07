@@ -46,7 +46,7 @@ use MediaWiki\MediaWikiServices;
 	    global $wgChartie;
 
       if ($file) {
-        if (self::check_file($file)) {
+        if (self::check_file_content($file)) {
                 $tmp = [];
                 parse_str(str_replace(array(','), array('&'), $params["frame"]["caption"]), $tmp);
                 foreach($wgChartie as $param => $value) {
@@ -132,7 +132,7 @@ use MediaWiki\MediaWikiServices;
       global $wgChartie;
       
       if ($imagepage->getDisplayedFile()) {
-        if (self::check_file($imagepage->getDisplayedFile())) {
+        if (self::check_file_content($imagepage->getDisplayedFile())) {
               $params=$wgChartie;
               $params["data"] = $imagepage->getDisplayedFile()->getCanonicalUrl();
 
@@ -153,7 +153,7 @@ use MediaWiki\MediaWikiServices;
         global $wgChartie;
 
         if ($file) {
-          if (self::check_file($file)) {
+          if (self::check_file_content($file)) {
               $params=array_merge($wgChartie, $handlerParams);
               $params["data"] = $file->getCanonicalUrl();
 
@@ -176,13 +176,16 @@ use MediaWiki\MediaWikiServices;
     //is compulsory for ImageHandler
 	}
 
-  public static function check_file($file){
+  public static function check_file_content($file){
+    if ($file->getMimeType() !== "text/csv") {
+      return false;
+    }
+
     global $wgChartie;
 
     $text  = file_get_contents($file->getCanonicalUrl());
     $delim = $wgChartie["delimiter"];
-    $match_format = (preg_match("/([^".$delim."]*)".$delim."([\\d\\.\\,]+)".$delim."([\\d\\.\\,]+)/ui", $text) !== 0);
-
-    return ($file->getMimeType() === "text/csv" && $match_format);
+    $regex = "/([^".$delim."]*)".$delim."([\\d\\.\\,]+)".$delim."([\\d\\.\\,]+)/ui";
+    return preg_match(regex, $text) !== 0;
   }
 }
