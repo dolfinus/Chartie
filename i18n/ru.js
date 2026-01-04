@@ -1,4 +1,4 @@
-var scale_types = [{
+var CHARTIE_SCALE_TYPES = [{
   name  : "general",
   title : "Установите значение",
   units : [  "а",    "ф",       "п",           "н",             "м",               "c",               "д",                 "",                   "К",                      "М",                       "Г",                            "Т",                              "П"                 ],
@@ -51,4 +51,4 @@ var scale_types = [{
   units : ["гр/100 гр", "%"]
 }];
 
-var def_legend_title  = "Растворители:";
+var CHARTIE_DEFAULT_LEGEND_TITLE  = "Растворители:";

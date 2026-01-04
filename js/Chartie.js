@@ -40,22 +40,22 @@ if (Array.prototype.remove === undefined) {
 }
 
 var container = document.getElementsByClassName("chart-container");
-if (container) {
+if (container.length > 0) {
     var margin = {
             top: 20,
             right: 40,
             bottom: 35,
             left: 55
         },
-        def_x_type = "temp",
-        def_y_type = "solub",
-        def_null = false,
-        def_delim = ';',
+        DEFAULT_X_TYPE = "temp",
+        DEFAULT_Y_TYPE = "solub",
+        DEFAULT_NULL = false,
+        DEFAULT_DELIMITER = ';',
         symb_height = 15,
         root = [],
         data = [],
         exclude = [],
-        sorted = [],
+        legendNames = [],
         x = [],
         y = [],
         legend = [],
@@ -64,8 +64,8 @@ if (container) {
         width = [],
         height = [];
 
-    if (window.scale_types === undefined) {
-        var def_legend_title = "Solvents:";
+    if (window.CHARTIE_SCALE_TYPES === undefined) {
+        var DEFAULT_LEGEND_TITLE = "Solvents:";
         var types = [{
                 name: "general",
                 title: "Change please",
@@ -119,31 +119,19 @@ if (container) {
             }
         ];
     } else {
-        var def_legend_title = window.def_legend_title;
-        var types = window.scale_types;
-    }
-
-    var page_params = document.getElementsByTagName('body')[0].className,
-        dark = (page_params.indexOf("dark") !== -1);
-
-    if (dark) {
-        var color_axis = "#b7b7b7";
-        var color_text = "#aaaaaa";
-        var color_grid = "#515151";
-    } else {
-        var color_axis = "#333333";
-        var color_text = "#515151";
-        var color_grid = "#e0e0e0";
+        var DEFAULT_LEGEND_TITLE = window.CHARTIE_DEFAULT_LEGEND_TITLE;
+        var types = window.CHARTIE_SCALE_TYPES;
     }
 
     container.forEach(function(item, id) {
         load_csv(id);
+        draw(id);
     });
 }
 
 function load_csv(id) {
-    root[id] = container[id].getAttribute('data');
-    if (root[id].match(/^(http\:|https\:|ftp\:)*(\/\/)/gi) !== null) {
+    var raw_data = container[id].getAttribute('data');
+    if (raw_data.match(/^(http\:|https\:|ftp\:)*(\/\/)/gi) !== null) {
         var xhr;
         if (window.XMLHttpRequest) {
             xhr = new XMLHttpRequest();
@@ -151,74 +139,68 @@ function load_csv(id) {
             xhr = new ActiveXObject("Microsoft.XMLHTTP");
         }
 
-        xhr.open("GET", root[id], true);
+        xhr.open("GET", raw_data, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                root[id] = xhr.responseText;
-                get_params(id);
+                raw_data = xhr.responseText;
+                fill_container_data(data, id);
             }
         }
         xhr.send(null);
     } else {
-        get_params(id);
+        fill_container_data(raw_data, id);
     }
 }
 
-function get_params(id) {
-    var delimiter = container[id].getAttribute('delimiter') !== null ? container[id].getAttribute('delimiter') : def_delim;
-    parce_csv(root[id], delimiter, id);
+function fill_container_data(data, id) {
+    var delimiter = container[id].getAttribute('delimiter') !== null ? container[id].getAttribute('delimiter') : DEFAULT_DELIMITER;
+    parse_csv(data, delimiter, id);
     root[id].sort(function(a, b) {
         return d3.ascending(a.name, b.name) || d3.ascending(a.x, b.x);
     });
 
-    //get sorted unique names for legend and toogle
-    sorted[id] = [];
-    var unique = d3.nest()
-        .key(function(d) {
-            return d.name;
-        })
-        .entries(root[id]);
-    unique.forEach(function(item, i) {
-        sorted[id].push(item.key);
-    });
-
-    sorted[id].sort(function(a, b) {
-        return d3.ascending(a, b)
-    });
+    // get unique sorted names for legend and toggle
+    legendNames[id] =
+        root[id]
+        .reduce(function(items, item) {
+            if (items.indexOf(item.name) === -1) {
+                items.push(item.name);
+            }
+            return items;
+        }, [])
+        .sort(d3.ascending);
 
     width[id] = parseInt(container[id].getAttribute('width'));
     height[id] = parseInt(container[id].getAttribute('height'));
 
     legend[id] = {
-        title: (container[id].getAttribute('legend_title') !== null ? container[id].getAttribute('legend_title') : def_legend_title)
+        title: (container[id].getAttribute('legend_title') !== null ? container[id].getAttribute('legend_title') : DEFAULT_LEGEND_TITLE)
     };
     chart[id] = {};
     x[id] = {};
-    x[id].type = (container[id].getAttribute('x_type') !== null) ? container[id].getAttribute('x_type') : def_x_type;
-    x[id].null = (container[id].getAttribute('x_null') !== null) ? container[id].getAttribute('x_null').match(/^(1|true)$/gui) : def_null;
+    x[id].type = (container[id].getAttribute('x_type') !== null) ? container[id].getAttribute('x_type') : DEFAULT_X_TYPE;
+    x[id].null = (container[id].getAttribute('x_null') !== null) ? container[id].getAttribute('x_null').match(/^(1|true)$/gui) : DEFAULT_NULL;
     x[id].title = (container[id].getAttribute('x_title') !== null) ? container[id].getAttribute('x_title') : get_title(x[id].type);
     x[id].unit = (container[id].getAttribute('x_unit') !== null) ? container[id].getAttribute('x_unit') : get_unit(x[id].type);
     x[id].I = get_i(x[id].type, x[id].unit);
     x[id].i = get_i(x[id].type, x[id].unit);
 
     y[id] = {};
-    y[id].type = (container[id].getAttribute('y_type') !== null) ? container[id].getAttribute('y_type') : def_y_type;
-    y[id].null = (container[id].getAttribute('y_null') !== null) ? container[id].getAttribute('y_null').match(/^(1|true)$/gui) : def_null;
+    y[id].type = (container[id].getAttribute('y_type') !== null) ? container[id].getAttribute('y_type') : DEFAULT_Y_TYPE;
+    y[id].null = (container[id].getAttribute('y_null') !== null) ? container[id].getAttribute('y_null').match(/^(1|true)$/gui) : DEFAULT_NULL;
     y[id].title = (container[id].getAttribute('y_title') !== null) ? container[id].getAttribute('y_title') : get_title(y[id].type);
     y[id].unit = (container[id].getAttribute('y_unit') !== null) ? container[id].getAttribute('y_unit') : get_unit(y[id].type);
     y[id].I = get_i(y[id].type, y[id].unit);
     y[id].i = get_i(y[id].type, y[id].unit);
-
-    draw(id);
 }
 
-function parce_csv(csv, delim, id) {
+function parse_csv(csv, delim, id) {
     var format_4 = "([^" + delim + "]*)" + delim + "([\\d\\.\\,]+)" + delim + "([\\d\\.\\,]+)" + delim + "(\\d*)",
         format_3 = "([^" + delim + "]*)" + delim + "([\\d\\.\\,]+)" + delim + "([\\d\\.\\,]+)",
         line;
 
     root[id] = [],
-        exclude[id] = [];
+    exclude[id] = [];
 
     if ((line = csv.match(RegExp(format_4, 'gi'))) !== null) {
         line.forEach(function(item, i) {
@@ -266,7 +248,6 @@ function draw(id) {
     add_y_axis(id)
     add_line(id);
     add_legend(id);
-    set_color(id);
     set_size(id);
 }
 
@@ -453,12 +434,12 @@ function clear_container(id) {
 }
 
 function init_container(id) {
-    chart[id].container = d3.select(container[id]).append("div").attr("class", "chart").append("svg").attr("transform", "translate(0,0)");
+    chart[id].container = d3.select(container[id]).append("div").attr("class", "chart").append("svg");
 }
 
 function calc_width(id) {
     var legend_width = 0;
-    sorted[id].forEach(function(name) {
+    legendNames[id].forEach(function(name) {
         legend_width = Math.max(legend_width, get_text_width(name) + 20, 80);
     });
 
@@ -482,7 +463,7 @@ function calc_height(id) {
     }
 
     var legend_height = 0;
-    legend_height = Math.max(chart[id].height - 10, sorted[id].length * symb_height);
+    legend_height = Math.max(chart[id].height - 10, legendNames[id].length * symb_height);
 
     legend[id].height = legend_height;
 }
@@ -510,7 +491,10 @@ function add_x_axis(id) {
         .tickSizeOuter(2)
         .tickPadding(5);
 
-    var x_axis_container = chart[id].container.append("g").attr("class", "x axis").attr("transform", "translate(" + margin.left + "," + (chart[id].height - margin.bottom) + ")");
+    var x_axis_container = chart[id].container
+        .append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(" + margin.left + "," + (chart[id].height - margin.bottom) + ")");
 
     var x_axis_line = x_axis_container.append("g")
         .attr("class", "plot")
@@ -545,7 +529,11 @@ function add_y_axis(id) {
         .tickSizeOuter(2)
         .tickPadding(5);
 
-    var y_axis_container = chart[id].container.append("g").attr("class", "y axis").attr("transform", "translate(" + (margin.left) + "," + (margin.top) + ")");
+    var y_axis_container = chart[id]
+        .container
+        .append("g")
+        .attr("class", "y axis").
+        attr("transform", "translate(" + (margin.left) + "," + (margin.top) + ")");
 
     var y_axis_line = y_axis_container.append("g")
         .attr("class", "plot")
@@ -616,62 +604,53 @@ function add_line(id) {
         })
         .y(function(d) {
             return y[id].scale(d.y);
-        })
+        });
 
-    var chart_svg = chart[id].container.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    var chart_lines = d3.nest()
-        .key(function(d) {
-            return d.name;
-        })
-        .entries(data[id]);
+    var chart_svg = chart[id]
+            .container
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    chart_lines.forEach(function(d, i) {
+    legendNames[id].map(function(name, i, arr) {
+        var values = data[id].filter(function(d) { return d.name === name; });
+        var color = generate_color(name, i, arr.length);
 
-        var color = intence("hsl(" + d.key.toString().hashCode() + ",100%,35%)", false);
+        chart_svg.append("path")
+            .attr("class", "plot")
+            .attr("d", line(values))
+            .attr("stroke", color);
 
-        if (d.values.length > 1) {
-            chart_svg.append("path")
-                .attr("class", "plot")
-                .attr("d", line(d.values))
-                .attr("stroke", color)
-                .attr("stroke-width", 2)
-                .attr("fill", "none");
+        chart_svg.append("path")
+            .attr("class", "plot-event")
+            .attr("d", line(values))
+            .on("mouseenter", function() {
+                highlight_item(id, name);
+            })
+            .on("mouseleave", function() {
+                hide_tip(id);
+                unhighlight_item(id, name);
+            })
+            .on("mousemove", function(e) {
+                var point = d3.pointer(e, container[id]);
+                show_tip(id,
+                    point[0],
+                    point[1]
+                );
+            })
+            .on("touchstart", function(e) {
+                var point = d3.pointer(e, container[id]);
+                show_tip(id,
+                    point[0][0],
+                    point[0][1]
+                );
+                highlight_item(id, name);
+            })
+            .on("dblclick", function() {
+                toggle_line(id, name);
+            });
 
-            chart_svg.append("path")
-                .attr("class", "plot-event")
-                .attr("d", line(d.values))
-                .attr("stroke", "transparent")
-                .attr("stroke-width", 10)
-                .attr("fill", "none")
-                .on("mouseenter", function() {
-                    highlight_item(id, d.key);
-                })
-                .on("mousemove", function(d) {
-                    var point = d3.mouse(container[id]);
-                    show_tip(id,
-                        point[0],
-                        point[1]
-                    );
-                })
-                .on("touchstart", function() {
-                    var point = d3.touches(container[id]);
-                    show_tip(id,
-                        point[0][0],
-                        point[0][1]
-                    );
-                    highlight_item(id, d.key);
-                })
-                /*
-                            .on("mouseout", function(event) {
-                                hide_tip(id);
-                                unselect_legend(id);
-                            })*/
-                .on("dblclick", function() {
-                    toggle_line(id, d.key);
-                });
-        }
         chart_svg.selectAll("dot")
-            .data(d.values)
+            .data(values)
             .enter().append("circle")
             .attr("class", "dot")
             .attr("cx", function(d) {
@@ -682,40 +661,34 @@ function add_line(id) {
             })
             .attr("r", 3)
             .attr("fill", color)
-            .attr("stroke", "transparent")
-            .attr("stroke-width", 10)
-            .on("mouseenter", function() {
-                var point = d3.mouse(container[id]);
+            .on("mouseenter", function(e) {
+                var point = d3.pointer(e, container[id]);
                 show_tip(id,
                     point[0],
                     point[1],
                     this.__data__.y
                 );
-                highlight_item(id, d.key);
+                highlight_item(id, name);
             })
-            .on("touchstart", function() {
-                var point = d3.touches(container[id]);
+            .on("mouseleave", function() {
+                hide_tip(id);
+                unhighlight_item(id, name);
+            })
+            .on("touchstart", function(e) {
+                var point = d3.pointer(e, container[id]);
                 show_tip(id,
                     point[0][0],
                     point[0][1],
                     this.__data__.y
                 );
-                highlight_item(id, d.key);
+                highlight_item(id, name);
             })
-            /*
-                      .on("mouseout", function(event) {
-                          hide_tip(id);
-                          unselect_legend(id);
-                      })*/
             .on("dblclick", function() {
-                toggle_line(id, d.key);
+                toggle_line(id, name);
             });
-
     });
 
-    tip[id] = chart_svg.append("text")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
+    tip[id] = chart_svg.append("text").attr("class", "tooltip hidden");
 }
 
 function toggle_line(id, name) {
@@ -726,8 +699,9 @@ function toggle_line(id, name) {
             exclude[id].push(name);
         }
     } else {
-        if (exclude[id].length !== sorted[id].length) {
-            exclude[id] = sorted[id].map(function(d) {
+        if (exclude[id].length !== legendNames[id].length) {
+            // array copy
+            exclude[id] = legendNames[id].map(function(d) {
                 return d;
             });
         } else {
@@ -746,11 +720,13 @@ function show_tip(id, dx, dy, text) {
         .attr("y", dy - margin.top - 5);
     tip[id].transition()
         .duration(100)
-        .style("opacity", .9);
+        .each(function () {
+            d3.select(this).classed("hidden", false);
+        });
 }
 
 function hide_tip(id) {
-    tip[id].style("opacity", 0);
+    tip[id].classed("hidden", true);
 }
 
 function add_legend(id) {
@@ -770,27 +746,24 @@ function add_legend(id) {
         .attr("transform", "translate(10,0)")
         .append("g");
 
-    sorted[id].forEach(function(name, i) {
-
-        var color = intence("hsl(" + name.toString().hashCode() + ",100%,35%)", false);
+    legendNames[id].forEach(function(name, i) {
+        var color = generate_color(name, i, legendNames[id].length);
 
         legend_svg.append("circle")
-            .attr("class", "dot")
+            .attr("class", "dot " + ((exclude[id].indexOf(name) !== -1) ? "disabled" : ""))
             .attr("cx", 5)
             .attr("cy", (i + 1) * 15 - 5)
             .attr("r", 4)
-            .attr("fill", ((exclude[id].indexOf(name) !== -1) ? "transparent" : color))
-            .attr("stroke", ((exclude[id].indexOf(name) !== -1) ? color : "transparent"))
-            .attr("stroke-width", 1)
+            .attr("fill", color)
+            .attr("stroke", color)
             .on("click", function() {
                 return toggle_line(id, name);
             });
 
         legend_svg.append("text")
-            .attr("class", "item")
+            .attr("class", "item " + ((exclude[id].indexOf(name) !== -1) ? "disabled" : ""))
             .attr("x", 16)
             .attr("y", (i + 1) * 15 - 1)
-            .attr("fill", ((exclude[id].indexOf(name) !== -1) ? unintence(unintence(color_text)) : color_text))
             .text(function() {
                 return name;
             })
@@ -806,11 +779,10 @@ function highlight_item(id, name) {
     legend.transition()
         .duration(100)
         .filter(function() {
-            if (this.innerHTML.indexOf(name) !== -1) {
-                this.style.fontWeight = "bold";
-            } else {
-                this.style.fontWeight = "normal";
-            };
+            return (this.innerHTML.indexOf(name) !== -1)
+        })
+        .each(function() {
+            d3.select(this).classed("highlight", true);
         });
 }
 
@@ -818,36 +790,16 @@ function unhighlight_item(id) {
     var legend = d3.select(container[id]).selectAll(".legend .item");
     legend.transition()
         .duration(100)
-        .style("font-weight", "normal");
+        .each(function() {
+            d3.select(this).classed("highlight", false);
+        });
 }
 
-function set_color(id) {
-    d3.select(container[id]).selectAll(".title,.unit")
-        .attr("fill", color_axis)
-        .style("color", color_axis);
-    d3.select(container[id]).selectAll(".domain")
-        .attr("stroke", color_axis);
-
-    d3.select(container[id]).selectAll(".axis .plot")
-        .attr("stroke", color_grid);
-    d3.select(container[id]).selectAll(".tick > line")
-        .attr("stroke", color_grid);
-
-    d3.select(container[id]).selectAll(".tick > text")
-        .attr("fill", color_text);
-
-    d3.select(container[id]).selectAll(".tooltip")
-        .attr("fill", intence(color_axis));
-}
-
-function unintence(color, for_light) {
-    for_light = (for_light !== 'undefined') ? for_light : false;
-    return (dark ? d3.color(color).darker() : (for_light ? d3.color(color).brighter() : d3.color(color)));
-}
-
-function intence(color, for_light) {
-    for_light = (for_light !== 'undefined') ? for_light : false;
-    return (dark ? d3.color(color).brighter() : (for_light ? d3.color(color).darker() : d3.color(color)));
+function generate_color(name, index, items) {
+  var percent = ((index + 1)/items) * 30;
+  var base_color = "var(--color-inverted-primary, light-dark(#333, #eee))";
+  var hue = name.toString().hashCode() % 360;
+  return "color-mix(in oklch, oklch(0.5 0.4 " + hue + "), " + base_color + " " + percent + "%)";
 }
 
 function set_size(id) {

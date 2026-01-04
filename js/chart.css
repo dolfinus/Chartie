@@ -17,30 +17,76 @@ div.legend.container {
     display: inline-flex;
 }
 
-.title,
-.unit
- {
-    stroke: none;
-    font: 14px Arial;
+.hidden {
+    display: none;
+}
+
+text.highlight {
     font-weight: bold;
 }
 
-.axis > line .domain,
+.chart .unit,
+.chart .tooltip,
+.legend .title,
+.legend .item {
+    stroke: none;
+    font: 14px Arial;
+    fill: var(--color-base, light-dark(#515151, #aaaaaa))
+}
+
+.legend .title,
+.chart .unit {
+  font-weight: bold;
+}
+
+.chart .plot {
+    stroke-width: 2;
+    fill: none;
+}
+
+.chart .plot-event {
+    stroke: transparent;
+    stroke-width: 10;
+    fill: none;
+}
+
+.chart .dot {
+  stroke: transparent;
+  stroke-width: 10;
+}
+
+.legend .dot {
+  stroke-width: 1;
+}
+
+.legend .dot.disabled {
+  fill: transparent;
+}
+
+.legend .item.disabled {
+  fill: var(--color-disabled, light-dark(#515151, #aaaaaa));
+}
+
 .tick > line {
     fill: none;
     stroke-width: 1;
-    font: 12px Arial;
+    stroke: var(--color-disabled, light-dark(#b7b7b7, #333333));
 }
-.tick > text,
-.legend .item {
+
+.axis > line {
+    fill: none;
+    stroke-width: 1;
+    stroke: var(--color-placeholder, light-dark(#e0e0e0, #515151));
+}
+.tick > text {
     stroke: none;
     font: 12px Arial;
+    fill: var(--color-base, light-dark(#515151, #aaaaaa));
 }
 .tooltip {
-    stroke: none;
-    font: 14px Arial;
     z-index: 2;
 }
+
 .legend .title,
 .legend .dot,
 .legend .item,
@@ -49,7 +95,7 @@ div.legend.container {
     cursor: pointer;
 }
 
-.legend .container{
+.legend .container {
     overflow-y: auto;
     overflow-x: hidden;
     display: inline-block;
